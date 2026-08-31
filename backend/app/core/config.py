@@ -3,6 +3,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     DATABASE_URL: str
+    
+
+    OPENAI_API_KEY: str
     EMBEDDING_DIMENSION: int = 1536
     JWT_SECRET_KEY: str = "your-super-secret-jwt-key-please-change-in-env"
     JWT_ALGORITHM: str = "HS256"
