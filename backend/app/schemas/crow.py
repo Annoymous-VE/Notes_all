@@ -20,11 +20,13 @@ class CrowChatRequest(BaseModel):
 class CrowSource(BaseModel):
     """A note/source referenced by Crow."""
 
-    note_id: UUID
+    note_id: UUID | str
     title: str
     score: float = 0.0
     is_premium: bool = False
     coin_price: int | None = None
+    category: str | None = None
+    preview_url: str | None = None
 
 
 class CrowChatResponse(BaseModel):

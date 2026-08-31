@@ -21,6 +21,7 @@ class CrowTools:
     ) -> None:
         self.retriever = retriever
         self.user_id = user_id
+        self.latest_sources: list[dict[str, Any]] = []
 
     def definitions(self) -> list[dict[str, Any]]:
         return [
@@ -129,6 +130,24 @@ class CrowTools:
             top_k=top_k,
             filters=filters,
         )
+
+        seen_notes: set[str] = set()
+        retrieved_sources: list[dict[str, Any]] = []
+        for chunk in chunks:
+            note_id_str = str(chunk.note_id)
+            if note_id_str not in seen_notes:
+                seen_notes.add(note_id_str)
+                meta = chunk.metadata or {}
+                title = meta.get("title") or meta.get("filename") or f"Note {note_id_str[:8]}"
+                retrieved_sources.append({
+                    "note_id": note_id_str,
+                    "title": title,
+                    "score": float(chunk.score),
+                    "is_premium": True if meta.get("price") else False,
+                    "coin_price": int(meta.get("price")) if meta.get("price") else 100,
+                    "category": meta.get("category"),
+                })
+        self.latest_sources = retrieved_sources
 
         return {
             "success": True,

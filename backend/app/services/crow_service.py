@@ -71,10 +71,14 @@ class CrowService:
 
         await self.db.commit()
 
+        sources = []
+        if hasattr(orchestrator, "tools") and hasattr(orchestrator.tools, "latest_sources"):
+            sources = orchestrator.tools.latest_sources
+
         return CrowChatResponse(
             conversation_id=conversation.id,
             message=response_text,
-            sources=[],
+            sources=sources,
             requires_confirmation=False,
             confirmation_type=None,
             created_at=datetime.now(timezone.utc),

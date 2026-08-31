@@ -1593,14 +1593,50 @@
   border-radius: var(--radius-lg);
   padding: 12px 16px;
   font-size: 0.88rem;
-  line-height: 1.5;
+  line-height: 1.55;
   color: #f1f5f9;
+  word-break: break-word;
+}
+
+.chat-bubble-card .markdown-content p {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.chat-bubble-card .markdown-content p:last-child {
+  margin-bottom: 0;
+}
+
+.chat-bubble-card .markdown-content strong {
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+.chat-bubble-card .markdown-content ul,
+.chat-bubble-card .markdown-content ol {
+  margin: 6px 0 10px 18px;
+  padding: 0;
+}
+
+.chat-bubble-card .markdown-content li {
+  margin-bottom: 4px;
+  line-height: 1.5;
+}
+
+.chat-bubble-card .markdown-content code {
+  background: rgba(0, 0, 0, 0.35);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.82rem;
+  color: #93c5fd;
 }
 
 .chat-bubble-row.user .chat-bubble-card {
   background: #1e3a8a;
   border-color: #3b82f6;
   color: #ffffff;
+  white-space: pre-wrap;
 }
 
 .crow-sources-deck {

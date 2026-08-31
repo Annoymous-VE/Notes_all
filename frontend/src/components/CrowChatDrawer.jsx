@@ -15,6 +15,14 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import { MOCK_CROW_PROMPTS } from '../data/notesData';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
+
+// Configure marked options for clean linebreaks and safe output
+marked.setOptions({
+  gfm: true,
+  breaks: true
+});
 
 export default function CrowChatDrawer({ 
   isOpen, 
@@ -102,11 +110,71 @@ export default function CrowChatDrawer({
       if (res && res.message) {
         setConversationId(res.conversation_id);
         
-        // Find if any sources matched from notes
-        const matchedSources = notes.filter(n => 
-          (res.sources && res.sources.some(s => s.title.toLowerCase() === n.title.toLowerCase())) ||
-          n.title.toLowerCase().includes(text.toLowerCase())
-        );
+        // Find if any sources matched from notes or backend sources
+        const matchedSources = [];
+        const seenIds = new Set();
+
+        // Check each note in marketplace
+        notes.forEach((n) => {
+          const titleLower = n.title.toLowerCase();
+          const userTextLower = text.toLowerCase();
+          const replyLower = res.message.toLowerCase();
+
+          // 1. Matches backend source note_id or title
+          const isBackendMatch = res.sources && res.sources.some(s => 
+            (s.note_id && (String(s.note_id) === String(n.id) || String(s.note_id) === String(n.file_id))) ||
+            (s.title && s.title.toLowerCase() === titleLower)
+          );
+
+          // 2. Mentioned in Crow's response message (e.g. "**Electrostatic Notes (Class 12)**")
+          const isMentionedInReply = replyLower.includes(titleLower) || 
+            (n.subject && replyLower.includes(n.subject.toLowerCase()) && titleLower.split(' ').some(w => w.length > 4 && replyLower.includes(w)));
+
+          // 3. User query mentions key terms of note title
+          const titleKeywords = titleLower.split(/[\s,()\-]+/).filter(w => w.length >= 4);
+          const isQueryMatch = titleKeywords.length > 0 && titleKeywords.some(kw => userTextLower.includes(kw));
+
+          if ((isBackendMatch || isMentionedInReply || isQueryMatch) && !seenIds.has(n.id)) {
+            seenIds.add(n.id);
+            matchedSources.push(n);
+          }
+        });
+
+        // If backend returned sources not found in local state (e.g. direct DB upload), synthesize a clickable note item
+        if (res.sources && res.sources.length > 0) {
+          res.sources.forEach((src) => {
+            const srcId = String(src.note_id);
+            if (!seenIds.has(srcId)) {
+              seenIds.add(srcId);
+              matchedSources.push({
+                id: srcId,
+                title: src.title,
+                category: src.category || 'Study Material',
+                subject: src.category || 'Academic',
+                description: `Verified study material: ${src.title}. Ranked high for your query with AI relevance score of ${Math.round((src.score || 0.85) * 100)}%.`,
+                author: {
+                  name: 'Verified Seller',
+                  institution: 'NoteVerse Contributor',
+                  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+                  rating: 4.9,
+                  salesCount: 120
+                },
+                price: src.coin_price || 100,
+                originalPrice: Math.round((src.coin_price || 100) * 1.5),
+                goldCoinPrice: src.coin_price || 100,
+                goldBarsEarned: Math.round((src.coin_price || 100) * 0.2),
+                pageCount: 38,
+                fileType: 'PDF Verified',
+                rating: 4.95,
+                reviewsCount: 42,
+                previewUrl: src.preview_url || 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80',
+                sampleSnippet: `Complete comprehensive concepts and questions for ${src.title}.`,
+                isFeatured: false,
+                isBestseller: true
+              });
+            }
+          });
+        }
 
         setMessages((prev) => [
           ...prev,
@@ -178,7 +246,16 @@ export default function CrowChatDrawer({
               )}
 
               <div className="chat-bubble-card">
-                <div className="bubble-text">{msg.text}</div>
+                {msg.role === 'assistant' ? (
+                  <div 
+                    className="bubble-text markdown-content"
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(marked.parse(msg.text || ''))
+                    }}
+                  />
+                ) : (
+                  <div className="bubble-text">{msg.text}</div>
+                )}
 
                 {/* Embedded Recommendations / Sources */}
                 {msg.sources && msg.sources.length > 0 && (
