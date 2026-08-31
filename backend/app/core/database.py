@@ -1,19 +1,25 @@
-from typing import Generator
-from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
+from collections.abc import AsyncGenerator
+
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+from sqlalchemy.orm import DeclarativeBase
+
 from app.core.config import settings
 
-engine = create_engine(
+
+engine = create_async_engine(
     settings.DATABASE_URL,
     echo=False,
     future=True,
 )
 
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
+AsyncSessionLocal = async_sessionmaker(
     bind=engine,
-    class_=Session,
+    class_=AsyncSession,
+    expire_on_commit=False,
 )
 
 
@@ -21,10 +27,6 @@ class Base(DeclarativeBase):
     pass
 
 
-def get_db() -> Generator[Session, None, None]:
-    """Dependency helper suitable for FastAPI."""
-    db = SessionLocal()
-    try:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as db:
         yield db
-    finally:
-        db.close()

@@ -21,8 +21,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # 1. Enable pgvector extension
-    op.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+    # 1. Enable pgvector extension (disabled for local setup without pgvector)
+    # op.execute("CREATE EXTENSION IF NOT EXISTS vector;")
 
     # 2. Create users table
     op.create_table(
@@ -59,22 +59,22 @@ def upgrade() -> None:
         sa.Column("file_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("chunk_index", sa.Integer(), nullable=False),
         sa.Column("content", sa.Text(), nullable=False),
-        sa.Column("embedding", Vector(1536), nullable=True),
+        # sa.Column("embedding", Vector(1536), nullable=True),
         sa.Column("metadata", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(["file_id"], ["files.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(op.f("ix_file_chunks_file_id"), "file_chunks", ["file_id"], unique=False)
-    op.create_index(
-        "ix_file_chunks_embedding_hnsw",
-        "file_chunks",
-        ["embedding"],
-        unique=False,
-        postgresql_using="hnsw",
-        postgresql_with={"m": 16, "ef_construction": 64},
-        postgresql_ops={"embedding": "vector_cosine_ops"},
-    )
+    # op.create_index(
+    #     "ix_file_chunks_embedding_hnsw",
+    #     "file_chunks",
+    #     ["embedding"],
+    #     unique=False,
+    #     postgresql_using="hnsw",
+    #     postgresql_with={"m": 16, "ef_construction": 64},
+    #     postgresql_ops={"embedding": "vector_cosine_ops"},
+    # )
 
     # 5. Create gold_bars table
     op.create_table(
@@ -120,7 +120,7 @@ def downgrade() -> None:
 
     op.drop_table("gold_bars")
 
-    op.drop_index("ix_file_chunks_embedding_hnsw", table_name="file_chunks")
+    # op.drop_index("ix_file_chunks_embedding_hnsw", table_name="file_chunks")
     op.drop_index(op.f("ix_file_chunks_file_id"), table_name="file_chunks")
     op.drop_table("file_chunks")
 
@@ -130,4 +130,4 @@ def downgrade() -> None:
     op.drop_index(op.f("ix_users_email"), table_name="users")
     op.drop_table("users")
 
-    op.execute("DROP EXTENSION IF EXISTS vector;")
+    # op.execute("DROP EXTENSION IF EXISTS vector;")

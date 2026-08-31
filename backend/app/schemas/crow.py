@@ -31,15 +31,10 @@ class CrowChatResponse(BaseModel):
     """Response returned by the Crow chat endpoint."""
 
     conversation_id: UUID
-
     message: str
 
     sources: list[CrowSource] = Field(
         default_factory=list
     )
-
-    requires_confirmation: bool = False
-
-    confirmation_type: str | None = None
 
     created_at: datetime
