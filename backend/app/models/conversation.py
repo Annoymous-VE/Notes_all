@@ -76,7 +76,8 @@ class ConversationMessage(Base):
         nullable=False,
     )
 
-    metadata: Mapped[dict | None] = mapped_column(
+    metadata_: Mapped[dict | None] = mapped_column(
+        "metadata",
         JSONB,
         nullable=True,
     )

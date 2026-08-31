@@ -35,9 +35,10 @@ class Chunk(Base):
         nullable=False,
     )
     embedding: Mapped[Optional[Any]] = mapped_column(
-        Vector(settings.EMBEDDING_DIMENSION),
+        Vector(384),
         nullable=True,
     )
+
     metadata_: Mapped[Optional[Dict[str, Any]]] = mapped_column(
         "metadata",
         JSONB,
