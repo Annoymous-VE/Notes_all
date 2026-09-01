@@ -3,7 +3,7 @@ from __future__ import annotations
 import io
 from dataclasses import dataclass
 
-import fitz  # PyMuPDF
+import fitz  # PyMuPDF #add fitz dependency
 import pytesseract
 from PIL import Image
 from docx import Document
