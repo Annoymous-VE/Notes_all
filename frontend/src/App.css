@@ -199,82 +199,31 @@
   gap: 12px;
 }
 
-/* Connection Status Badge */
-.connection-status-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 600;
-  transition: var(--transition-normal);
-  user-select: none;
-}
-
-.connection-status-pill.online {
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  color: #34d399;
-}
-
-.connection-status-pill.offline {
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #f87171;
-}
-
-.connection-status-pill.checking {
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.4);
-  color: #fbbf24;
-}
-
-.status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.status-dot.online {
-  background: #10b981;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
-  animation: pulseGreen 2s infinite;
-}
-
-.status-dot.offline {
-  background: #ef4444;
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.7);
-}
-
-.status-dot.checking {
-  background: #f59e0b;
-  animation: pulseGreen 1s infinite;
-}
-
-@keyframes pulseGreen {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1.15); opacity: 1; }
-  100% { transform: scale(0.95); opacity: 0.8; }
-}
-
+/* Gold Bars Wallet Pill */
 .gold-bars-pill {
-
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(180, 83, 9, 0.25));
+  gap: 9px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(180, 83, 9, 0.3));
   border: 1px solid var(--border-gold);
-  padding: 6px 14px;
+  padding: 6px 16px;
   border-radius: var(--radius-full);
   cursor: default;
+  box-shadow: 0 2px 12px rgba(245, 158, 11, 0.2);
+  transition: var(--transition-normal);
+}
+
+.gold-bars-pill:hover {
+  border-color: var(--gold-light);
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.35);
+  transform: translateY(-1px);
 }
 
 .gold-coin-symbol {
   color: #fbbf24;
   display: flex;
   align-items: center;
+  filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.6));
 }
 
 .gold-balance-text {
@@ -286,7 +235,7 @@
 .gold-amount {
   font-family: var(--font-heading);
   font-weight: 800;
-  font-size: 0.98rem;
+  font-size: 1rem;
   color: #fbbf24;
 }
 
@@ -294,38 +243,41 @@
   font-size: 0.65rem;
   color: #fde68a;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 .sell-notes-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: #1e293b;
-  border: 1px solid var(--border-subtle);
+  gap: 7px;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #f8fafc;
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 8px 16px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  padding: 8px 18px;
   border-radius: var(--radius-full);
   transition: var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .sell-notes-btn:hover {
   background: #334155;
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--border-gold);
+  color: var(--gold-light);
   transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
 }
 
 .nav-icon-btn {
   position: relative;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #151c2e;
+  background: rgba(21, 28, 46, 0.85);
   border: 1px solid var(--border-subtle);
   color: #f8fafc;
   transition: var(--transition-fast);
@@ -334,6 +286,8 @@
 .nav-icon-btn:hover {
   background: #1e2942;
   border-color: var(--border-gold);
+  color: var(--gold-light);
+  transform: scale(1.05);
 }
 
 .cart-badge-count {
@@ -344,44 +298,50 @@
   color: #fff;
   font-size: 0.7rem;
   font-weight: 800;
-  width: 19px;
-  height: 19px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid var(--bg-primary);
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
 }
 
 .login-trigger-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   background: var(--gold-gradient);
   color: #0f172a;
-  font-weight: 700;
-  font-size: 0.85rem;
-  padding: 8px 18px;
+  font-weight: 800;
+  font-size: 0.88rem;
+  padding: 8px 20px;
   border-radius: var(--radius-full);
-  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.4);
   transition: var(--transition-fast);
 }
 
 .login-trigger-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+  box-shadow: 0 6px 24px rgba(245, 158, 11, 0.6);
 }
 
 .user-logged-box {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: #151c2e;
+  gap: 9px;
+  background: rgba(21, 28, 46, 0.85);
   border: 1px solid var(--border-subtle);
-  padding: 4px 12px 4px 4px;
+  padding: 4px 14px 4px 4px;
   border-radius: var(--radius-full);
   cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.user-logged-box:hover {
+  border-color: var(--border-gold);
 }
 
 .avatar-circle {

@@ -13,7 +13,8 @@ import {
   setGoldBars, 
   getUserData, 
   setUserData, 
-  setAuthToken 
+  setAuthToken,
+  api
 } from './services/api';
 import { 
   Sparkles, 
@@ -49,38 +50,12 @@ function App() {
   const [isSellModalOpen, setIsSellModalOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [backendStatus, setBackendStatus] = useState('checking'); // 'online' | 'offline' | 'checking'
   const [activeQuickViewNote, setActiveQuickViewNote] = useState(null);
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Materials');
   const [sortBy, setSortBy] = useState('bestseller');
-
-  // Check backend connectivity on mount and every 15 seconds
-  useEffect(() => {
-    let isMounted = true;
-    const checkConnection = async () => {
-      try {
-        const res = await fetch('http://127.0.0.1:8000/health');
-        if (res.ok) {
-          if (isMounted) setBackendStatus('online');
-        } else {
-          if (isMounted) setBackendStatus('offline');
-        }
-      } catch (e) {
-        if (isMounted) setBackendStatus('offline');
-      }
-    };
-
-    checkConnection();
-    const interval = setInterval(checkConnection, 15000);
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
-  }, []);
-
 
   // Sync state changes
   useEffect(() => {
@@ -175,7 +150,6 @@ function App() {
     <div className="app-root">
       {/* Top Navigation */}
       <Navbar
-        backendStatus={backendStatus}
         goldBars={goldBars}
         cartCount={cart.length}
         searchQuery={searchQuery}

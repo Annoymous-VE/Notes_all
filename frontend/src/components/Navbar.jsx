@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 
 export default function Navbar({
-  backendStatus = 'checking',
   goldBars,
   cartCount,
   searchQuery,
@@ -42,7 +41,7 @@ export default function Navbar({
 
       {/* Main Navbar */}
       <div className="navbar-container">
-        {/* Brand Logo & Connection Badge */}
+        {/* Brand Logo */}
         <div className="brand-logo-area" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
           <div className="logo-icon-box">
             <GraduationCap className="logo-cap-icon" size={24} />
@@ -81,19 +80,8 @@ export default function Navbar({
           </button>
         </div>
 
-        {/* Action Controls: Backend Status, Gold Bars, Sell Notes, Cart, Account */}
+        {/* Action Controls: Gold Bars, Sell Notes, Cart, Account */}
         <div className="nav-actions">
-          {/* Backend Connection Indicator Badge */}
-          <div 
-            className={`connection-status-pill ${backendStatus}`}
-            title={backendStatus === 'online' ? 'Backend FastAPI Server is Connected (127.0.0.1:8000)' : 'Backend API is Offline'}
-          >
-            <span className={`status-dot ${backendStatus}`}></span>
-            <span className="status-label">
-              {backendStatus === 'online' ? 'API Online' : backendStatus === 'checking' ? 'Connecting...' : 'API Offline'}
-            </span>
-          </div>
-
           {/* Gold Bars Wallet pill */}
           <div 
             className="gold-bars-pill animate-pulse-glow"
@@ -107,7 +95,6 @@ export default function Navbar({
               <span className="gold-label">Gold Bars</span>
             </div>
           </div>
-
 
           {/* Sell Notes Button */}
           <button 
