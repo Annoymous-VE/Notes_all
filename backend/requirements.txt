@@ -125,7 +125,7 @@ fastmcp-slim==3.4.7
     # via
     #   backend
     #   pydantic-ai-slim
-filelock==3.32.4
+filelock==3.32.5
     # via huggingface-hub
 flatbuffers==25.12.19
     # via onnxruntime
@@ -385,7 +385,7 @@ protobuf==7.36.0
     #   logfire
     #   onnxruntime
     #   opentelemetry-proto
-psycopg2==2.9.12
+psycopg2-binary==2.9.12
     # via backend
 py-key-value-aio==0.4.5
     # via
