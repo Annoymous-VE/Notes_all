@@ -393,9 +393,11 @@ protobuf==7.36.0
     #   opentelemetry-proto
 psycopg==3.3.5
     # via backend
-psycopg-binary==3.3.5 ; implementation_name != 'pypy'
-    # via psycopg
-psycopg2==2.9.12
+psycopg-binary==3.3.5
+    # via
+    #   backend
+    #   psycopg
+psycopg2-binary==2.9.12
     # via backend
 py-key-value-aio==0.4.5
     # via
