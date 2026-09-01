@@ -239,5 +239,5 @@ class TextChunker:
 
         if len(text) <= self.chunk_overlap:
             return text
-
-        return text[-self.chunk_overlap:]
+              
+        return text[-self.chunk_overlap:]   
