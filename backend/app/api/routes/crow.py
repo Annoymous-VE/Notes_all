@@ -3,39 +3,52 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agent.orchestrator import CrowOrchestrator
+from app.agent.tools import CrowTools
 from app.api.dependencies import get_current_user, get_db
+from app.llm.client import LLMClient
 from app.models.user import User
+from app.rag.retriever import RAGRetriever
 from app.schemas.crow import CrowChatRequest, CrowChatResponse
+from app.search.hybrid import HybridSearch
 from app.services.crow_service import CrowService
 
+
+from app.ingestion.embedder import Embedder
 
 router = APIRouter(
     prefix="/crow",
     tags=["Crow AI"],
 )
 
+_shared_embedder = Embedder()
+
 
 async def get_crow_service(
     db: AsyncSession = Depends(get_db),
 ) -> CrowService:
     """
-    Create the CrowService.
-
-    The actual orchestrator/LLM dependency should be injected
-    here once the agent wiring is finalized.
+    Create the CrowService with complete orchestrator wiring.
     """
 
-    # TODO:
-    # Replace with your actual orchestrator factory.
     async def orchestrator_factory(user_id: UUID):
-        raise NotImplementedError(
-            "Crow orchestrator factory is not configured yet."
+        llm_client = LLMClient()
+        hybrid_search = HybridSearch(db=db)
+        tools = CrowTools(
+            retriever=RAGRetriever(hybrid_search=hybrid_search, embedder=_shared_embedder),
+            user_id=str(user_id),
         )
+        return CrowOrchestrator(
+            client=llm_client,
+            tools=tools,
+        )
+
 
     return CrowService(
         db=db,
         orchestrator_factory=orchestrator_factory,
     )
+
 
 
 @router.post(

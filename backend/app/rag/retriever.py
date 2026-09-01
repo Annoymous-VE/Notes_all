@@ -33,7 +33,7 @@ class RAGRetriever:
     def __init__(
         self,
         hybrid_search: HybridSearch,
-        embedder: Embedder,
+        embedder: Embedder | None = None,
     ) -> None:
         self.hybrid_search = hybrid_search
         self.embedder = embedder
@@ -49,8 +49,13 @@ class RAGRetriever:
         if not query.strip():
             return []
 
-        # Generate embedding for semantic search.
-        query_embedding = await self.embedder.embed_query(query)
+        # Generate embedding for semantic search if embedder is available
+        query_embedding = None
+        if self.embedder:
+            try:
+                query_embedding = await self.embedder.embed_query(query)
+            except Exception:
+                query_embedding = None
 
         # Perform keyword + vector search.
         results = await self.hybrid_search.search(
@@ -59,6 +64,7 @@ class RAGRetriever:
             filters=filters,
             query_embedding=query_embedding,
         )
+
 
         return [
             self._normalize_result(result)

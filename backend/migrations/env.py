@@ -17,8 +17,9 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Set database URL dynamically from core settings (escape % for configparser interpolation)
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
+# Set database URL dynamically from core settings (escape % for configparser interpolation, use sync driver for Alembic)
+sync_db_url = settings.DATABASE_URL.replace("postgresql+asyncpg://", "postgresql+psycopg://").replace("?ssl=require", "?sslmode=require").replace("%", "%%")
+config.set_main_option("sqlalchemy.url", sync_db_url)
 
 target_metadata = Base.metadata
 

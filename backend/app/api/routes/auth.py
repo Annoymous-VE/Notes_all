@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Response, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_current_user
 from app.core.database import get_db
@@ -28,22 +28,22 @@ router = APIRouter(
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def register(
+async def register(
     data: UserRegister,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
-    return register_user(db, data)
+    return await register_user(db, data)
 
 
 @router.post(
     "/login",
     response_model=TokenResponse,
 )
-def login(
+async def login(
     data: UserLogin,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
-    token = login_user(db, data)
+    token = await login_user(db, data)
 
     return TokenResponse(
         access_token=token,
@@ -55,10 +55,10 @@ def login(
     "/account",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def delete_account(
+async def delete_account(
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
-    delete_user_account(db, current_user.id)
+    await delete_user_account(db, current_user.id)
 
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
