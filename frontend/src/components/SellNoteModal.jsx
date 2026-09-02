@@ -46,14 +46,13 @@ export default function SellNoteModal({
     setErrorMsg('');
 
     if (!selectedFile) {
-      setErrorMsg('Please select your note document (PDF, DOCX, or scan images)');
+      setErrorMsg('Please select your study material file (PDF, DOCX, or scan images)');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // 1. Try real file upload to backend endpoint /files/upload with metadata
       const userId = currentUser ? (currentUser.id || currentUser.email) : 'demo-seller-user-id';
       
       try {
@@ -66,11 +65,9 @@ export default function SellNoteModal({
           price: formData.price
         });
       } catch (err) {
-        console.warn('Backend file upload fallback to client mock:', err);
+        console.warn('Backend file upload fallback to client simulation:', err);
       }
 
-
-      // Calculate gold reward for seller (15% of price in gold bars)
       const calculatedGoldBars = Math.max(20, Math.floor(formData.price * 0.15));
 
       const newNote = {
@@ -78,8 +75,8 @@ export default function SellNoteModal({
         title: formData.title,
         description: formData.description,
         author: {
-          name: currentUser ? currentUser.name : 'You (Verified Seller)',
-          institution: 'Self Published',
+          name: currentUser ? currentUser.name : 'You (Verified Scholar)',
+          institution: 'Verified Contributor',
           avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
           rating: 5.0,
           salesCount: 1
@@ -91,8 +88,8 @@ export default function SellNoteModal({
         originalPrice: Math.round(Number(formData.price) * 1.8),
         goldCoinPrice: Number(formData.price),
         goldBarsEarned: calculatedGoldBars,
-        pageCount: Math.floor(Math.random() * 50) + 45,
-        fileType: 'PDF Verified',
+        pageCount: Math.floor(Math.random() * 40) + 40,
+        fileType: 'PDF Verified Scan',
         rating: 5.0,
         reviewsCount: 1,
         previewUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80',
@@ -106,7 +103,7 @@ export default function SellNoteModal({
       setTimeout(() => {
         setUploadSuccess(false);
         onClose();
-      }, 1800);
+      }, 1600);
 
     } catch (err) {
       setErrorMsg(err.message || 'Error publishing your note. Please try again.');
@@ -117,39 +114,43 @@ export default function SellNoteModal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content glass-panel" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content sell-modal glass-panel-accent" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title-box">
-            <UploadCloud className="gold-text" size={24} />
+            <div className="modal-icon-badge">
+              <UploadCloud className="gold-text" size={20} />
+            </div>
             <div>
               <h3>Publish & Sell Your Notes</h3>
-              <p className="modal-sub">Turn your handwritten study notes into steady passive income</p>
+              <p className="modal-sub">Turn your semester coursework & PYQ solutions into passive revenue</p>
             </div>
           </div>
           <button className="close-btn" onClick={onClose}>
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {uploadSuccess ? (
           <div className="upload-success-card">
-            <CheckCircle2 size={48} className="success-icon" />
+            <div className="celebration-circle animate-pulse-glow">
+              <CheckCircle2 size={48} className="gold-text" />
+            </div>
             <h4>Note Successfully Listed!</h4>
-            <p>Your notes are now live on NoteVerse marketplace. You will earn rupees on sales + <strong>Gold Bars</strong> every time a student downloads your notes!</p>
+            <p>Your notes are now live on the NoteVerse marketplace. You will earn rupees on every sale + <strong>Gold Bars</strong> whenever students download your materials!</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="sell-form">
             {errorMsg && (
               <div className="error-alert">
-                <AlertCircle size={16} />
+                <AlertCircle size={15} />
                 <span>{errorMsg}</span>
               </div>
             )}
 
             {!currentUser && (
-              <div className="auth-hint-banner">
-                <Info size={16} />
-                <span>Publishing as guest demo seller. Sign in anytime to link your real bank payout account.</span>
+              <div className="auth-hint-banner glass-panel">
+                <Info size={15} className="cyan-text" />
+                <span>Publishing as guest contributor. Sign in anytime to link your real bank payout account.</span>
               </div>
             )}
 
@@ -170,6 +171,7 @@ export default function SellNoteModal({
                 <select 
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  className="sell-select"
                 >
                   <option value="Computer Science">Computer Science / GATE</option>
                   <option value="Civil Services">Civil Services / UPSC</option>
@@ -193,13 +195,13 @@ export default function SellNoteModal({
               </div>
             </div>
 
-            <div className="seller-earnings-highlight">
-              <Coins size={16} className="gold-text" />
-              <span>Buyers will earn <strong>+{Math.max(20, Math.floor(formData.price * 0.15))} Gold Bars</strong> on purchase!</span>
+            <div className="seller-earnings-highlight glass-panel">
+              <Coins size={15} className="gold-text" />
+              <span>Buyers will earn <strong>+{Math.max(20, Math.floor(formData.price * 0.15))} Gold Bars</strong> upon purchase!</span>
             </div>
 
             <div className="form-group">
-              <label>Description & Chapter Outline</label>
+              <label>Description & Chapter Outline *</label>
               <textarea 
                 rows="3"
                 placeholder="Summarize key chapters, memory tricks, or previous years questions included..."
@@ -230,15 +232,15 @@ export default function SellNoteModal({
                   accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
                 />
                 <label htmlFor="note-file-input" className="file-drop-label">
-                  <UploadCloud size={32} className="drop-icon" />
+                  <UploadCloud size={28} className="drop-icon" />
                   {selectedFile ? (
                     <span className="file-selected-name">
                       <FileText size={16} /> {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
                     </span>
                   ) : (
                     <>
-                      <span className="drop-title">Click to browse or drop your study material</span>
-                      <span className="drop-sub">Supports PDF, Word Documents, Clean Scans up to 50MB</span>
+                      <span className="drop-title">Click to choose or drag & drop study material</span>
+                      <span className="drop-sub">Supports PDF, Word, Clean Scans up to 50MB</span>
                     </>
                   )}
                 </label>

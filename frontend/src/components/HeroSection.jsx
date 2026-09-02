@@ -6,39 +6,79 @@ import {
   ShieldCheck, 
   TrendingUp, 
   Award,
-  ArrowRight
+  ArrowRight,
+  UploadCloud,
+  CheckCircle2,
+  Users,
+  Star,
+  FileCheck
 } from 'lucide-react';
 
-export default function HeroSection({ onOpenCrow, onExploreClick, onOpenSellModal }) {
+const QUICK_EXAM_TAGS = [
+  { label: 'GATE CSE', category: 'Computer Science' },
+  { label: 'UPSC CSE', category: 'Civil Services' },
+  { label: 'NEET 2025', category: 'Medical / NEET' },
+  { label: 'FAANG SDE', category: 'Engineering / Software' },
+  { label: 'CA Final', category: 'Commerce / CA' },
+];
+
+export default function HeroSection({ 
+  onOpenCrow, 
+  onExploreClick, 
+  onOpenSellModal,
+  onSelectCategory 
+}) {
   return (
     <section className="hero-banner-wrapper">
       <div className="hero-grid">
-        {/* Left Copy */}
+        {/* Left Headline & CTAs */}
         <div className="hero-text-side">
           <div className="hero-pill-badge">
             <Sparkles size={14} className="gold-text" />
-            <span>AI-Powered Study Exchange</span>
+            <span>AI-Powered Study & Notes Exchange</span>
+            <span className="pill-dot">•</span>
+            <span className="pill-highlight">Gold Bar Rewards</span>
           </div>
 
           <h1 className="hero-headline">
-            India's Premier <span className="gold-gradient-text">Notes Marketplace</span> Powered by AI
+            India's #1 Study Exchange for <span className="hero-gradient-text">Topper Notes</span> & Blueprints
           </h1>
 
           <p className="hero-subtitle">
-            Buy verified topper notes, sell your semester materials to earn, and stack 
-            <strong> Gold Bars</strong> for massive discounts or free downloads. 
-            Get personal recommendations from <strong>Crow AI</strong>.
+            Buy verified notes with high-yield annotations, sell your semester materials for real cash + 
+            <strong> Gold Bars</strong>, or redeem notes <strong>100% free</strong> with the guidance of <strong>Crow AI</strong>.
           </p>
 
+          {/* Quick Exam Pills */}
+          <div className="hero-exam-pills">
+            <span className="exam-pills-label">Popular Exams:</span>
+            <div className="exam-pills-row">
+              {QUICK_EXAM_TAGS.map((tag, idx) => (
+                <button 
+                  key={idx} 
+                  className="exam-pill-btn"
+                  onClick={() => {
+                    if (onSelectCategory) onSelectCategory(tag.category);
+                    onExploreClick();
+                  }}
+                >
+                  {tag.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Main CTAs */}
           <div className="hero-cta-group">
             <button className="primary-action-btn" onClick={onExploreClick}>
               <BookOpen size={18} />
-              <span>Explore Materials</span>
+              <span>Explore Top Notes</span>
               <ArrowRight size={16} />
             </button>
 
             <button className="secondary-action-btn" onClick={onOpenSellModal}>
-              <span>Become a Seller</span>
+              <UploadCloud size={17} />
+              <span>List Your Notes</span>
             </button>
 
             <button className="crow-assistant-pill-btn" onClick={onOpenCrow}>
@@ -47,20 +87,20 @@ export default function HeroSection({ onOpenCrow, onExploreClick, onOpenSellModa
             </button>
           </div>
 
-          {/* Quick Perks / Value Props */}
+          {/* Value Props Strip */}
           <div className="hero-perks-row">
             <div className="perk-item">
               <div className="perk-icon-circle gold">
                 <Coins size={16} />
               </div>
               <div className="perk-details">
-                <strong>Gold Bar Rewards</strong>
+                <strong>Gold Bar Wallet</strong>
                 <span>Earn on every purchase</span>
               </div>
             </div>
 
             <div className="perk-item">
-              <div className="perk-icon-circle blue">
+              <div className="perk-icon-circle indigo">
                 <Sparkles size={16} />
               </div>
               <div className="perk-details">
@@ -70,18 +110,18 @@ export default function HeroSection({ onOpenCrow, onExploreClick, onOpenSellModa
             </div>
 
             <div className="perk-item">
-              <div className="perk-icon-circle green">
+              <div className="perk-icon-circle emerald">
                 <ShieldCheck size={16} />
               </div>
               <div className="perk-details">
-                <strong>Verified Quality</strong>
-                <span>Peer-reviewed scan copies</span>
+                <strong>100% Verified Scans</strong>
+                <span>Peer-reviewed topper notes</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Interactive Feature Showcase */}
+        {/* Right Interactive Feature Showcase Card */}
         <div className="hero-visual-side">
           <div className="feature-card-floating glass-panel animate-float">
             <div className="card-top-row">
@@ -99,10 +139,10 @@ export default function HeroSection({ onOpenCrow, onExploreClick, onOpenSellModa
               <span className="bestseller-badge">★ 4.9 RATED</span>
             </div>
 
-            <h4 className="sample-note-title">GATE CSE 2025: Complete OS & Virtual Memory Masterclass</h4>
+            <h4 className="sample-note-title">GATE CSE 2025: Operating Systems & Virtual Memory Masterclass</h4>
             
             <div className="sample-snippet-box">
-              <span className="snippet-label">Sample Preview snippet:</span>
+              <span className="snippet-label">High-Yield Excerpt:</span>
               <p>"Paging with TLB 2-Level Address Translation & Belady's Anomaly diagram with exact formulas..."</p>
             </div>
 
@@ -115,18 +155,67 @@ export default function HeroSection({ onOpenCrow, onExploreClick, onOpenSellModa
 
               <div className="or-gold-badge">
                 <Coins size={14} className="gold-text" />
-                <span>OR <strong>199 Gold Bars</strong></span>
+                <span>OR <strong>199 Bars (Free)</strong></span>
               </div>
             </div>
 
             <div className="coin-earning-alert">
-              <span>🎁 Purchasing rewards you with <strong>+30 Gold Bars</strong></span>
+              <span>🎁 Purchasing gives you <strong>+30 Gold Bars</strong> instant cashback</span>
             </div>
           </div>
 
-          {/* Background decorative elements */}
-          <div className="ambient-orb-gold" />
-          <div className="ambient-orb-cyan" />
+          {/* Glowing background aura */}
+          <div className="ambient-orb-primary" />
+          <div className="ambient-orb-secondary" />
+        </div>
+      </div>
+
+      {/* Live Marketplace Trust Counters */}
+      <div className="hero-metrics-strip glass-panel">
+        <div className="metric-item">
+          <div className="metric-icon-box">
+            <FileCheck size={20} className="gold-text" />
+          </div>
+          <div className="metric-data">
+            <div className="metric-val">50,000+</div>
+            <div className="metric-label">Verified Notes & Blueprints</div>
+          </div>
+        </div>
+
+        <div className="metric-divider" />
+
+        <div className="metric-item">
+          <div className="metric-icon-box">
+            <Users size={20} className="cyan-text" />
+          </div>
+          <div className="metric-data">
+            <div className="metric-val">15,000+</div>
+            <div className="metric-label">Rankers & University Sellers</div>
+          </div>
+        </div>
+
+        <div className="metric-divider" />
+
+        <div className="metric-item">
+          <div className="metric-icon-box">
+            <Coins size={20} className="gold-text" />
+          </div>
+          <div className="metric-data">
+            <div className="metric-val">₹15 Lakh+</div>
+            <div className="metric-label">Earned by Student Authors</div>
+          </div>
+        </div>
+
+        <div className="metric-divider" />
+
+        <div className="metric-item">
+          <div className="metric-icon-box">
+            <Star size={20} className="rose-text" />
+          </div>
+          <div className="metric-data">
+            <div className="metric-val">4.92 / 5.0</div>
+            <div className="metric-label">Average Student Satisfaction</div>
+          </div>
         </div>
       </div>
     </section>

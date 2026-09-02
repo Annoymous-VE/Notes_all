@@ -26,12 +26,43 @@ import {
   Award,
   ChevronRight,
   UploadCloud,
-  CheckCircle
+  CheckCircle,
+  Terminal,
+  Scale,
+  Stethoscope,
+  Cpu,
+  TrendingUp,
+  FlaskConical,
+  Filter,
+  Flame,
+  Star,
+  Check
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import './App.css';
 
+const CATEGORY_ICONS = {
+  'All Materials': Sparkles,
+  'Computer Science': Terminal,
+  'Civil Services': Scale,
+  'Medical / NEET': Stethoscope,
+  'Engineering / Software': Cpu,
+  'Commerce / CA': TrendingUp,
+  'General Science': FlaskConical,
+};
+
+const QUICK_FILTERS = [
+  { id: 'all', label: 'All Materials', icon: Sparkles },
+  { id: 'bestseller', label: '👑 Bestsellers', icon: Award },
+  { id: 'free_coins', label: '🔥 Free with Gold Bars', icon: Coins },
+  { id: 'high_rated', label: '⭐ 4.9+ Rated', icon: Star },
+];
+
 function App() {
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('noteverse_theme') || 'cosmic';
+  });
+
   const [notes, setNotes] = useState(() => {
     const saved = localStorage.getItem('notesall_marketplace_notes');
     return saved ? JSON.parse(saved) : INITIAL_NOTES;
@@ -55,7 +86,20 @@ function App() {
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Materials');
+  const [activeQuickFilter, setActiveQuickFilter] = useState('all');
   const [sortBy, setSortBy] = useState('bestseller');
+  const [toastMessage, setToastMessage] = useState('');
+
+  // Handle theme persistence
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);
+    localStorage.setItem('noteverse_theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   // Sync state changes
   useEffect(() => {
@@ -66,6 +110,11 @@ function App() {
     localStorage.setItem('notesall_purchased_ids', JSON.stringify(purchasedNoteIds));
   }, [purchasedNoteIds]);
 
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 3000);
+  };
+
   const updateGoldBars = (newVal) => {
     setGoldBarsState(newVal);
     setGoldBars(newVal);
@@ -75,6 +124,9 @@ function App() {
   const handleAddToCart = (note) => {
     if (!cart.some(item => item.id === note.id)) {
       setCart([...cart, note]);
+      showToast(`Added "${note.title.slice(0, 30)}..." to study cart!`);
+    } else {
+      showToast(`Note is already in your study cart!`);
     }
     setIsCartOpen(true);
   };
@@ -90,13 +142,14 @@ function App() {
       setPurchasedNoteIds(prev => [...prev, note.id]);
       
       try {
-        confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
+        confetti({ particleCount: 90, spread: 70, origin: { y: 0.7 } });
       } catch (e) {}
 
-      alert(`🎉 Congratulations! You redeemed "${note.title}" for 100% free using ${note.goldCoinPrice} Gold Bars!`);
+      showToast(`🎉 Redeemed "${note.title}" 100% Free with ${note.goldCoinPrice} Gold Bars!`);
       setActiveQuickViewNote(note);
     } else {
-      alert(`You need ${note.goldCoinPrice - goldBars} more Gold Bars to get this for free. You can add it to cart and pay with cash, or ask Crow AI for other notes!`);
+      showToast(`You need ${note.goldCoinPrice - goldBars} more Gold Bars to get this for free.`);
+      setIsCrowOpen(true);
     }
   };
 
@@ -107,27 +160,29 @@ function App() {
     const newIds = purchasedNotes.map(n => n.id);
     setPurchasedNoteIds(prev => [...prev, ...newIds]);
     setCart([]);
+    showToast(`Order complete! +${coinsAwarded} Gold Bars credited to your wallet.`);
   };
 
   // Published new note by seller
   const handleNotePublished = (newNote) => {
     setNotes([newNote, ...notes]);
-    // Award the user 25 gold bars for publishing their first note
     updateGoldBars(goldBars + 25);
+    showToast(`🎉 Note published! +25 Gold Bars added to your wallet.`);
   };
 
   const handleLoginSuccess = (user) => {
     setCurrentUserState(user);
-    // Give 150 welcome gold bars if user is fresh
     if (goldBars < 150) {
       updateGoldBars(150);
     }
+    showToast(`Welcome back, ${user.name || 'Scholar'}!`);
   };
 
   const handleLogout = () => {
     setAuthToken(null);
     setUserData(null);
     setCurrentUserState(null);
+    showToast('Signed out successfully.');
   };
 
   // Filter and Sort Notes
@@ -138,7 +193,17 @@ function App() {
       n.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       n.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())) ||
       n.author.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+
+    let matchesQuickFilter = true;
+    if (activeQuickFilter === 'bestseller') {
+      matchesQuickFilter = n.isBestseller;
+    } else if (activeQuickFilter === 'free_coins') {
+      matchesQuickFilter = n.goldCoinPrice <= goldBars;
+    } else if (activeQuickFilter === 'high_rated') {
+      matchesQuickFilter = n.rating >= 4.9;
+    }
+
+    return matchesCategory && matchesSearch && matchesQuickFilter;
   }).sort((a, b) => {
     if (sortBy === 'price-low') return a.price - b.price;
     if (sortBy === 'price-high') return b.price - a.price;
@@ -147,7 +212,15 @@ function App() {
   });
 
   return (
-    <div className="app-root">
+    <div className="app-root" data-theme={theme}>
+      {/* Toast Alert Banner */}
+      {toastMessage && (
+        <div className="toast-notification-banner glass-panel-accent animate-float">
+          <Sparkles size={16} className="gold-text" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Top Navigation */}
       <Navbar
         goldBars={goldBars}
@@ -160,8 +233,9 @@ function App() {
         onOpenAuth={() => setIsAuthOpen(true)}
         currentUser={currentUser}
         onLogout={handleLogout}
+        currentTheme={theme}
+        onThemeChange={handleThemeChange}
       />
-
 
       {/* Hero Banner Section */}
       <HeroSection 
@@ -170,24 +244,34 @@ function App() {
         onExploreClick={() => {
           document.getElementById('marketplace-anchor')?.scrollIntoView({ behavior: 'smooth' });
         }}
+        onSelectCategory={(cat) => setSelectedCategory(cat)}
       />
 
-      {/* Main Marketplace Area */}
+      {/* Main Marketplace Section */}
       <main className="marketplace-section" id="marketplace-anchor">
         <div className="marketplace-container">
           
-          {/* Category Pills Navigation (Amazon/Flipkart Style) */}
+          {/* Category Navigation Strip with Icons and Item Counts */}
           <div className="categories-header-strip">
             <div className="categories-pills-list">
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat}
-                  className={`category-chip ${selectedCategory === cat ? 'active' : ''}`}
-                  onClick={() => setSelectedCategory(cat)}
-                >
-                  {cat}
-                </button>
-              ))}
+              {CATEGORIES.map((cat) => {
+                const IconComponent = CATEGORY_ICONS[cat] || BookOpen;
+                const count = cat === 'All Materials' 
+                  ? notes.length 
+                  : notes.filter(n => n.category === cat).length;
+
+                return (
+                  <button
+                    key={cat}
+                    className={`category-chip ${selectedCategory === cat ? 'active' : ''}`}
+                    onClick={() => setSelectedCategory(cat)}
+                  >
+                    <IconComponent size={15} className="cat-chip-icon" />
+                    <span>{cat}</span>
+                    <span className="cat-chip-count">{count}</span>
+                  </button>
+                );
+              })}
             </div>
 
             <div className="sort-control-group">
@@ -197,23 +281,50 @@ function App() {
                 onChange={(e) => setSortBy(e.target.value)}
                 className="sort-dropdown"
               >
-                <option value="bestseller">Bestsellers & Featured</option>
-                <option value="rating">Highest Rated</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
+                <option value="bestseller">👑 Bestsellers & Featured</option>
+                <option value="rating">⭐ Highest Rated (4.9+)</option>
+                <option value="price-low">₹ Price: Low to High</option>
+                <option value="price-high">₹ Price: High to Low</option>
               </select>
             </div>
           </div>
 
+          {/* Quick Filter Sub-toolbar */}
+          <div className="quick-filter-toolbar">
+            <div className="quick-filter-pills">
+              <span className="quick-filter-label">Quick Filter:</span>
+              {QUICK_FILTERS.map((qf) => {
+                const Icon = qf.icon;
+                return (
+                  <button
+                    key={qf.id}
+                    className={`qf-chip ${activeQuickFilter === qf.id ? 'active' : ''}`}
+                    onClick={() => setActiveQuickFilter(qf.id)}
+                  >
+                    <Icon size={13} />
+                    <span>{qf.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Quick Wallet Callout */}
+            <div className="quick-balance-callout" onClick={() => setIsCrowOpen(true)}>
+              <Coins size={15} className="gold-text" />
+              <span>Wallet: <strong>{goldBars} Gold Bars</strong></span>
+              <span className="wallet-redeem-hint">Redeem Free &rarr;</span>
+            </div>
+          </div>
+
           {/* Crow AI Smart Banner inside Marketplace */}
-          <div className="crow-discovery-strip glass-panel">
+          <div className="crow-discovery-strip glass-panel-accent">
             <div className="discovery-left">
               <div className="crow-avatar-small">
                 <Sparkles size={18} className="gold-text" />
               </div>
               <div>
-                <strong>Need help picking the right study material?</strong>
-                <p>Crow AI analyzes semester syllabus, past question trends, and matches your Gold Bars balance.</p>
+                <strong>Need help finding the right study material?</strong>
+                <p>Crow AI matches your exam syllabus, question patterns, and finds items you can redeem for 100% Free with your Gold Bars.</p>
               </div>
             </div>
             <button className="crow-consult-btn" onClick={() => setIsCrowOpen(true)}>
@@ -225,15 +336,9 @@ function App() {
           <div className="section-title-row">
             <div>
               <h2 className="section-title">
-                {selectedCategory === 'All Materials' ? 'Explore Top Verified Study Materials' : selectedCategory}
+                {selectedCategory === 'All Materials' ? 'Explore Verified Study Materials' : selectedCategory}
               </h2>
-              <p className="section-desc">Showing {filteredNotes.length} hand-curated notes with topper annotations</p>
-            </div>
-
-            {/* Quick Balance Reminder */}
-            <div className="quick-balance-callout">
-              <Coins size={16} className="gold-text" />
-              <span>Your Wallet: <strong>{goldBars} Gold Bars</strong></span>
+              <p className="section-desc">Showing {filteredNotes.length} hand-curated notes with topper annotations & verified solution sheets</p>
             </div>
           </div>
 
@@ -256,24 +361,31 @@ function App() {
             <div className="no-results-box glass-panel">
               <h3>No study materials found for "{searchQuery}"</h3>
               <p>Try searching for different keywords or ask Crow AI for assistance.</p>
-              <button className="crow-consult-btn mt-4" onClick={() => setSearchQuery('')}>
-                Reset Search Filters
+              <button 
+                className="crow-consult-btn mt-4" 
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCategory('All Materials');
+                  setActiveQuickFilter('all');
+                }}
+              >
+                Reset All Filters
               </button>
             </div>
           )}
 
-          {/* Selling Promotional Banner */}
-          <section className="seller-callout-banner glass-panel">
+          {/* Selling Callout Banner */}
+          <section className="seller-callout-banner glass-panel-accent">
             <div className="seller-banner-content">
               <div className="banner-badge">EARN PASSIVE REVENUE</div>
               <h2>Have Great Semester Notes? Start Selling Today</h2>
               <p>
                 Upload your handwritten PDFs or solved question banks. Set your own price in Rupees, 
-                and receive a continuous stream of earnings + Gold Bars whenever peers download your materials!
+                and receive a continuous stream of student earnings + Gold Bars whenever peers download your materials!
               </p>
               <div className="seller-banner-actions">
                 <button className="btn-become-seller" onClick={() => setIsSellModalOpen(true)}>
-                  <UploadCloud size={18} />
+                  <UploadCloud size={17} />
                   <span>List Your Notes Now</span>
                 </button>
               </div>
@@ -290,11 +402,11 @@ function App() {
         title="Chat with Crow AI (Rufus for Notes)"
       >
         <div className="fab-icon-box">
-          <Sparkles size={24} className="sparkle-anim" />
+          <Sparkles size={22} className="sparkle-anim" />
         </div>
         <div className="fab-text-box">
           <span className="fab-title">Ask Crow AI</span>
-          <span className="fab-sub">Study Assistant</span>
+          <span className="fab-sub">Study Advisor</span>
         </div>
       </button>
 
@@ -347,18 +459,18 @@ function App() {
           <div className="footer-brand-col">
             <div className="brand-logo-area">
               <GraduationCap className="logo-cap-icon" size={24} />
-              <div className="brand-title">Note<span className="gold-text">Verse</span></div>
+              <div className="brand-title">Note<span className="brand-gradient-text">Verse</span></div>
             </div>
             <p className="footer-desc">
-              India's premier digital marketplace for students and university scholars to buy, sell, and learn with AI assistance.
+              India's premier digital marketplace for university scholars to buy, sell, and learn with AI-powered study assistance.
             </p>
           </div>
           <div className="footer-links-col">
             <h4>Marketplace</h4>
-            <a href="#marketplace-anchor">Engineering & CS</a>
-            <a href="#marketplace-anchor">Civil Services / UPSC</a>
-            <a href="#marketplace-anchor">Medical / NEET</a>
-            <a href="#marketplace-anchor">CA & Commerce</a>
+            <a href="#marketplace-anchor" onClick={() => setSelectedCategory('Computer Science')}>Engineering & CS</a>
+            <a href="#marketplace-anchor" onClick={() => setSelectedCategory('Civil Services')}>Civil Services / UPSC</a>
+            <a href="#marketplace-anchor" onClick={() => setSelectedCategory('Medical / NEET')}>Medical / NEET</a>
+            <a href="#marketplace-anchor" onClick={() => setSelectedCategory('Commerce / CA')}>CA & Commerce</a>
           </div>
           <div className="footer-links-col">
             <h4>Gold Bar Rewards</h4>

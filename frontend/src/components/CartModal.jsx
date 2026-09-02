@@ -7,7 +7,8 @@ import {
   CheckCircle, 
   ShoppingBag, 
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  Zap
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -21,7 +22,6 @@ export default function CartModal({
   onCheckoutSuccess
 }) {
   const [useCoinsDiscount, setUseCoinsDiscount] = useState(false);
-  const [coinsToRedeem, setCoinsToRedeem] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
   const [lastEarnedCoins, setLastEarnedCoins] = useState(0);
@@ -31,7 +31,6 @@ export default function CartModal({
   const totalFiat = cartItems.reduce((acc, item) => acc + item.price, 0);
   const totalEarnableCoins = cartItems.reduce((acc, item) => acc + (item.goldBarsEarned || 25), 0);
 
-  // Maximum coins that can be applied (1 coin = ₹1 discount, capped at either total fiat or user's coins balance)
   const maxRedeemable = Math.min(userCoins, totalFiat);
   const appliedCoins = useCoinsDiscount ? maxRedeemable : 0;
   const finalPayable = Math.max(0, totalFiat - appliedCoins);
@@ -40,16 +39,13 @@ export default function CartModal({
     setIsProcessing(true);
 
     setTimeout(() => {
-      // Trigger festive celebration confetti
       try {
         confetti({
-          particleCount: 100,
-          spread: 70,
+          particleCount: 120,
+          spread: 80,
           origin: { y: 0.6 }
         });
-      } catch (e) {
-        // ignore if not supported
-      }
+      } catch (e) {}
 
       setLastEarnedCoins(totalEarnableCoins);
       setOrderComplete(true);
@@ -60,7 +56,7 @@ export default function CartModal({
         coinsUsed: appliedCoins,
         coinsAwarded: totalEarnableCoins
       });
-    }, 1200);
+    }, 1000);
   };
 
   const handleResetAndClose = () => {
@@ -72,49 +68,53 @@ export default function CartModal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content cart-modal glass-panel" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content cart-modal glass-panel-accent" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title-box">
-            <ShoppingBag className="gold-text" size={24} />
+            <div className="modal-icon-badge">
+              <ShoppingBag className="gold-text" size={20} />
+            </div>
             <div>
-              <h3>Your Study Cart ({cartItems.length} items)</h3>
-              <p className="modal-sub">Instant high-speed digital download access after payment</p>
+              <h3>Your Study Cart ({cartItems.length})</h3>
+              <p className="modal-sub">Instant high-speed digital download access after checkout</p>
             </div>
           </div>
           <button className="close-btn" onClick={onClose}>
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {orderComplete ? (
           <div className="checkout-success-view">
             <div className="celebration-circle animate-pulse-glow">
-              <CheckCircle size={56} className="gold-text" />
+              <CheckCircle size={52} className="gold-text" />
             </div>
             <h2>Payment Successful!</h2>
             <p className="order-lead">
-              Your study notes have been unlocked and added to your library for permanent offline access.
+              Your study notes have been unlocked and added to your permanent library with offline access.
             </p>
 
-            <div className="gold-reward-banner animate-float">
+            <div className="gold-reward-banner animate-float glass-panel">
               <div className="reward-badge-circle">
-                <Coins size={30} className="gold-text" />
+                <Coins size={28} className="gold-text" />
               </div>
               <div>
                 <span className="reward-title">Gold Bars Credited to Wallet!</span>
                 <div className="reward-amount">+{lastEarnedCoins} Gold Bars</div>
-                <span className="reward-sub">Use them to buy your next semester notes for free!</span>
+                <span className="reward-sub">Redeem them for your next semester notes for 100% free!</span>
               </div>
             </div>
 
             <button className="btn-continue-shopping" onClick={handleResetAndClose}>
-              View My Library & Continue Shopping
+              View Library & Continue Browsing
             </button>
           </div>
         ) : cartItems.length === 0 ? (
           <div className="empty-cart-state">
-            <ShoppingBag size={54} className="empty-icon" />
-            <h4>Your cart is empty</h4>
+            <div className="empty-icon-circle">
+              <ShoppingBag size={42} className="empty-icon" />
+            </div>
+            <h4>Your study cart is empty</h4>
             <p>Explore topper notes and exam blueprints to supercharge your revision.</p>
             <button className="btn-explore-now" onClick={onClose}>
               Browse Notes
@@ -132,7 +132,7 @@ export default function CartModal({
                     <span className="cart-item-author">By {item.author.name} • {item.author.institution}</span>
                     <div className="cart-item-meta">
                       <span className="cart-earn-tag">
-                        <Coins size={12} className="gold-text" /> +{item.goldBarsEarned} Bars
+                        <Coins size={11} className="gold-text" /> +{item.goldBarsEarned} Bars
                       </span>
                       <span className="cart-pages">{item.pageCount} Pages • {item.fileType}</span>
                     </div>
@@ -142,9 +142,9 @@ export default function CartModal({
                     <button 
                       className="cart-remove-btn" 
                       onClick={() => onRemoveItem(item.id)}
-                      title="Remove"
+                      title="Remove from Cart"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={15} />
                     </button>
                   </div>
                 </div>
@@ -161,10 +161,10 @@ export default function CartModal({
               </div>
 
               {/* Gold Bars Discount Toggle */}
-              <div className="gold-redemption-card">
+              <div className="gold-redemption-card glass-panel">
                 <div className="redemption-header">
                   <div className="redemption-label">
-                    <Coins size={16} className="gold-text" />
+                    <Coins size={15} className="gold-text" />
                     <strong>Redeem Gold Bars</strong>
                   </div>
                   <label className="toggle-switch">
@@ -178,11 +178,11 @@ export default function CartModal({
                   </label>
                 </div>
                 <div className="redemption-sub">
-                  You have <strong className="gold-text">{userCoins} Gold Bars</strong> available.
+                  Available Balance: <strong className="gold-text">{userCoins} Bars</strong>.
                   {userCoins > 0 ? (
-                    <span> 1 Gold Bar = ₹1 instant discount.</span>
+                    <span> 1 Bar = ₹1 instant discount.</span>
                   ) : (
-                    <span> Earn bars on this order!</span>
+                    <span> Earn bars with this purchase!</span>
                   )}
                 </div>
 
@@ -207,10 +207,10 @@ export default function CartModal({
                 </span>
               </div>
 
-              {/* Earning banner */}
+              {/* Earning incentive */}
               <div className="earning-incentive-box">
-                <Sparkles size={16} className="gold-text" />
-                <span>You will earn <strong>+{totalEarnableCoins} Gold Bars</strong> upon placing this order!</span>
+                <Sparkles size={15} className="gold-text" />
+                <span>You will earn <strong>+{totalEarnableCoins} Gold Bars</strong> on this order!</span>
               </div>
 
               <button 
@@ -223,7 +223,7 @@ export default function CartModal({
                 ) : (
                   <>
                     <span>Place Order {finalPayable === 0 ? '(Free)' : `• ₹${finalPayable}`}</span>
-                    <ArrowRight size={18} />
+                    <ArrowRight size={16} />
                   </>
                 )}
               </button>
