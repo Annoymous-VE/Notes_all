@@ -38,7 +38,7 @@ async def register_user(db: AsyncSession, data: UserRegister) -> User:
     return user
 
 
-async def login_user(db: AsyncSession, data: UserLogin) -> str:
+async def login_user(db: AsyncSession, data: UserLogin) -> tuple[str, User]:
     result = await db.execute(
         select(User).where(User.email == data.email)
     )
@@ -53,7 +53,8 @@ async def login_user(db: AsyncSession, data: UserLogin) -> str:
             detail="Invalid email or password",
         )
 
-    return create_access_token(str(user.id))
+    token = create_access_token(str(user.id))
+    return token, user
 
 
 async def delete_user_account(db: AsyncSession, user_id: UUID) -> None:

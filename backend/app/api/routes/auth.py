@@ -43,12 +43,23 @@ async def login(
     data: UserLogin,
     db: AsyncSession = Depends(get_db),
 ):
-    token = await login_user(db, data)
+    token, user = await login_user(db, data)
 
     return TokenResponse(
         access_token=token,
         token_type="bearer",
+        user=UserResponse.model_validate(user),
     )
+
+
+@router.get(
+    "/me",
+    response_model=UserResponse,
+)
+async def get_me(
+    current_user: User = Depends(get_current_user),
+):
+    return current_user
 
 
 @router.delete(

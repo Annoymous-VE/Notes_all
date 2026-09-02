@@ -40,28 +40,21 @@ export default function AuthModal({
         
         const loginRes = await api.login(email, password);
         setAuthToken(loginRes.access_token);
-        const userData = { id: regRes.id, name, email };
+        const userData = loginRes.user || { id: regRes.id, name: regRes.name || name, email };
         setUserData(userData);
         onLoginSuccess(userData);
         setTimeout(() => onClose(), 600);
       } else {
         const loginRes = await api.login(email, password);
         setAuthToken(loginRes.access_token);
-        const userData = { email, name: email.split('@')[0] };
+        const userData = loginRes.user || { email, name: email.split('@')[0] };
         setUserData(userData);
         onLoginSuccess(userData);
         onClose();
       }
     } catch (err) {
-      console.warn("Backend auth call returned error, enabling demo session:", err);
-      const fallbackUser = {
-        id: 'user-' + Date.now(),
-        name: name || email.split('@')[0] || 'Demo Scholar',
-        email: email || 'scholar@university.edu'
-      };
-      setUserData(fallbackUser);
-      onLoginSuccess(fallbackUser);
-      onClose();
+      console.error("Authentication failed:", err);
+      setErrorMsg(err.message || 'Authentication failed. Please verify your credentials.');
     } finally {
       setLoading(false);
     }
@@ -138,8 +131,8 @@ export default function AuthModal({
               <Lock size={16} className="input-icon" />
               <input 
                 type="password" 
-                placeholder="••••••••"
-                minLength={6}
+                placeholder="•••••••• (min 8 chars)"
+                minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required

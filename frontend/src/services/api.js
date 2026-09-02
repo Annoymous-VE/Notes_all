@@ -54,8 +54,18 @@ export const api = {
     }
   },
 
-  // Auth
+  // Helper to extract clean error message from FastAPI responses
+  _extractErrorMessage(err, fallback) {
+    if (!err) return fallback;
+    if (typeof err.detail === 'string') return err.detail;
+    if (Array.isArray(err.detail)) {
+      return err.detail.map(d => d.msg || JSON.stringify(d)).join(', ');
+    }
+    if (typeof err.message === 'string') return err.message;
+    return fallback;
+  },
 
+  // Auth
   async register(name, email, password) {
     const res = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
@@ -64,7 +74,7 @@ export const api = {
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: 'Registration failed' }));
-      throw new Error(err.detail || 'Registration failed');
+      throw new Error(this._extractErrorMessage(err, 'Registration failed'));
     }
     return await res.json();
   },
@@ -76,10 +86,29 @@ export const api = {
       body: JSON.stringify({ email, password })
     });
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: 'Invalid credentials' }));
-      throw new Error(err.detail || 'Invalid credentials');
+      const err = await res.json().catch(() => ({ detail: 'Invalid email or password' }));
+      throw new Error(this._extractErrorMessage(err, 'Invalid email or password'));
     }
     return await res.json();
+  },
+
+  async getMe() {
+    const token = getAuthToken();
+    if (!token) return null;
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/me`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) {
+        setAuthToken(null);
+        setUserData(null);
+        return null;
+      }
+      return await res.json();
+    } catch (e) {
+      return null;
+    }
   },
 
   // Crow AI

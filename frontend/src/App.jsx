@@ -101,6 +101,26 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
+  // Validate user session token with backend on mount
+  useEffect(() => {
+    const verifySession = async () => {
+      const token = localStorage.getItem('notesall_token');
+      if (token) {
+        const user = await api.getMe();
+        if (user) {
+          setCurrentUserState(user);
+          setUserData(user);
+        } else {
+          // Token is invalid/expired
+          localStorage.removeItem('notesall_token');
+          localStorage.removeItem('notesall_user');
+          setCurrentUserState(null);
+        }
+      }
+    };
+    verifySession();
+  }, []);
+
   // Sync state changes
   useEffect(() => {
     localStorage.setItem('notesall_marketplace_notes', JSON.stringify(notes));
